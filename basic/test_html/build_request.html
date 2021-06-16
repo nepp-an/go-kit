@@ -1,0 +1,204 @@
+<html>
+<head>
+    <title>Dynamic Table</title>
+    <style>
+        p{ margin-left:6px; margin-top:20px; margin-bottom:22px;}
+        b{ margin-bottom:22px;}
+        font{ margin-bottom:22px;}
+    </style>
+    <script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>
+    <script type="text/javascript">
+        function addRow(){
+            try{
+                var table=document.getElementById("abtest_tb");
+                var table_len = table.rows.length
+                var newRow=document.createElement("tr");
+                var col_index=document.createElement("td");
+                col_index.innerHTML='<input name="index" readonly="readonly" style="border-style:none;font-size:85%" type="text" size="8"' + ' value="' + table_len + '"/>';
+                var col_module=document.createElement("td");
+                col_module.innerHTML='<input name="module" style="border-style:none;font-size:85%" type="text" size="12"/>';
+                var col_eid=document.createElement("td");
+                col_eid.innerHTML='<input name="eid" style="border-style:none;font-size:85%" type="text" size="8"/>';
+                var col_vid=document.createElement("td");
+                col_vid.innerHTML='<input name="vid" style="border-style:none;font-size:85%" type="text" size="8"/>';
+                var col_param=document.createElement("td");
+                col_param.innerHTML='<input name="ab_param" style="font-size:85%;border-style:none;background:#EEEEEE" type="text" size="70" onClick="loadABParam(this)"/>';
+                var col_action=document.createElement("td");
+                col_action.innerHTML='<input style="" mce_style="display:none" type="button" value="Delete" onClick="deleteRow(this)"/>';
+                newRow.appendChild(col_index);
+                newRow.appendChild(col_module);
+                newRow.appendChild(col_eid);
+                newRow.appendChild(col_vid);
+                newRow.appendChild(col_param);
+                newRow.appendChild(col_action);
+                table.appendChild(newRow);
+            }
+            catch(e){
+                alert(e.message);
+            }
+        }
+
+        function addCallApolloAgainRow(){
+            try{
+                var table=document.getElementById("abtest_tb");
+                var table_len = table.rows.length
+                var newRow=document.createElement("tr");
+                var col_index=document.createElement("td");
+                col_index.innerHTML='<input name="index" readonly="readonly" style="border-style:none;font-size:85%" type="text" size="8"' + ' value="' + table_len + '"/>';
+                var col_module=document.createElement("td");
+                col_module.innerHTML='<input name="module" readonly="readonly" value="zeus" style="border-style:none;font-size:85%" type="text" size="12"/>';
+                var col_eid=document.createElement("td");
+                col_eid.innerHTML='<input name="eid" style="border-style:none;font-size:85%" type="text" size="8"/>';
+                var col_vid=document.createElement("td");
+                col_vid.innerHTML='<input name="vid" style="border-style:none;font-size:85%" type="text" size="8"/>';
+                var col_param=document.createElement("td");
+                col_param.innerHTML='<input name="ab_param" readonly="readonly" value="{&quot;call_apollo_again&quot;:true}" style="font-size:85%;border-style:none;background:#EEEEEE" type="text" size="70"/>';
+                var col_action=document.createElement("td");
+                col_action.innerHTML='<input style="" mce_style="display:none" type="button" value="Delete" onClick="deleteRow(this)"/>';
+                newRow.appendChild(col_index);
+                newRow.appendChild(col_module);
+                newRow.appendChild(col_eid);
+                newRow.appendChild(col_vid);
+                newRow.appendChild(col_param);
+                newRow.appendChild(col_action);
+                table.appendChild(newRow);
+            }
+            catch(e){
+                alert(e.message);
+            }
+        }
+
+        function deleteRow(obj)
+        {
+            console.log(obj)
+            if(obj==null) return;
+            var parentTD = obj.parentNode;
+            var parentTR = parentTD.parentNode;
+            var parentTB = parentTR.parentNode;
+            console.log(obj)
+            parentTB.removeChild(parentTR);
+        }
+
+        function loadABParam(inputObj)
+        {
+            console.log(inputObj)
+            if(inputObj==null) return;
+            //if(inputObj.value != "") return;
+            var parentTD = inputObj.parentNode;
+            var parentTR = parentTD.parentNode;
+            var module = parentTR.cells[1].childNodes[0].value
+            var eid = parentTR.cells[2].childNodes[0].value
+            var vid = parentTR.cells[3].childNodes[0].value
+            console.log(module,eid, vid)
+            // get ab param
+            $.get("/ab_param", {eid: eid.toString(10), vid: vid.toString(10)},
+                function(data){
+                    console.log("module:"+ module + "eid:" + eid + "; vid:" + vid+ "; params: " + data);
+                    inputObj.value = data;
+                });
+        }
+
+        function genABParams()
+        {
+            var tableObj = document.getElementById("abtest_tb");
+            var abParams = new Array()
+            for (var i = 1; i < tableObj.rows.length; i++) {
+                module = tableObj.rows[i].cells[1].childNodes[0].value;
+                eid = tableObj.rows[i].cells[2].childNodes[0].value;
+                vid = tableObj.rows[i].cells[3].childNodes[0].value;
+                param = tableObj.rows[i].cells[4].childNodes[0].value;
+                var paramObj;
+                try {
+                    if (typeof JSON.parse(param) == "object") {
+                        paramObj = JSON.parse(param);
+                    }
+                } catch(e){
+                    alert(param + ":" + e);
+                    return "";
+                }
+                var obj = {module:module, eid:eid,vid:vid,parameters:paramObj}
+                abParams.push(obj)
+            }
+            var o = {module:"zeus",eid:"",vid:"",parameters:{"tracking_turn_on":true}}
+            abParams.push(o)
+            console.log(abParams)
+            return JSON.stringify(abParams)
+        }
+        function requestNewsServer()
+        {
+            var uri = document.getElementById("uri").value;
+            var uid = document.getElementById("uid").value;
+            var reqHeader = document.getElementById("req_header").value;
+            var reqBody = document.getElementById("req_body").value;
+            var abParams = genABParams()
+            if (abParams == "") {
+                return;
+            }
+            console.log(reqBody)
+            $.get("/new_request", {uid:uid, uri: uri, req_header: reqHeader, req_body:reqBody, ab_params:abParams},
+                function(data){
+                    console.log(data);
+                    document.write(data);
+                    document.close();
+                });
+        }
+
+    </script>
+</head>
+<body>
+<input type="hidden" id="uid" name="uid" type="text" size="80" value="{{.UID}}"/>
+<p>
+    <font size=4><b>URI</b></font>
+    <br><input id="uri" name="uri" type="text" size="131" style="font-size:85%;" value="{{.URI}}"/>
+</p>
+<p>
+    <font size=4><b>Request Header</b></font>
+    <br><textarea rows="10" cols="130" name="req_header" id="req_header" style="font-size:85%;" >{{.RequestHeader}}</textarea><br>
+</p>
+<p>
+    <font size=4><b>Request Body</b></font>
+    <br><textarea rows="10" cols="130" name="req_body" id="req_body" style="font-size:85%;" >{{.RequestBody}}</textarea><br>
+</p>
+<p>
+    <font size=4><b>AB Test</b></font>
+    <br>
+<table id="abtest_tb" border="1" cellspacing="0" cellpadding="7">
+    <tr>
+        <th>
+            Index
+        </th>
+        <th>
+            Module
+        </th>
+        <th>
+            EID
+        </th>
+        <th>
+            VID
+        </th>
+        <th>
+            AB Param
+        </th>
+        <th>
+            Action
+        </th>
+    </tr>
+    {{range .ABParamRows}}
+        <tr>
+            <td><input name="index" readonly="readonly" style="border-style:none;font-size:85%" type="text" size="8" value="{{.Index}}"/></td>
+            <td><input name="module" style="border-style:none;font-size:85%" type="text" size="12" value="{{.Module}}"/></td>
+            <td><input name="eid" style="border-style:none;font-size:85%" type="text" size="8" value="{{.EID}}"/></td>
+            <td><input name="vid" style="border-style:none;font-size:85%" type="text" size="8" value="{{.VID}}"/></td>
+            <td><input name="ab_param" style="font-size:85%;border-style:none;background:#EEEEEE" readonly="readonly" type="text" size="70" onClick="loadABParam(this)" value='{{.Params}}'/></td>
+            <td><input style="" mce_style="display:none" type="button" value="Delete" onClick="deleteRow(this)"/></td>
+        </tr>
+    {{ end }}
+</table>
+<br>
+<input type="button" style="width:140px;background:#cdd;font-size:100%;" value="Add Experiment" onClick="addRow()"/>
+<input type="button" style="width:260px;background:#cdd;font-size:100%;" value="Add CallApolloAgain Experiment" onClick="addCallApolloAgainRow()"/>
+<br><br>
+<input type="button" style="width:140px;background:#cdd;font-size:120%;" value="Run"  onClick="requestNewsServer()" />
+</p>
+</body>
+</html>

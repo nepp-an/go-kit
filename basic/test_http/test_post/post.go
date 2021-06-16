@@ -1,0 +1,53 @@
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "image-server/common"
+    "net/http"
+    "time"
+)
+
+func main() {
+    bucket := `Upload-Images`
+    key := `test_upload_2`
+    data := "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"
+    fmt.Println(Post2ImageServer(bucket, key, data))
+}
+
+type uploadImage struct {
+    Image string `json:"image"`
+}
+
+func Post2ImageServer(bucket string, key string, data string) error {
+    //servers := config.ConsumerConf.ImageServer.Servers
+    //timeoutMs := config.ConsumerConf.ImageServer.TimeoutMs
+    server := "img-console.ams.op-mobile.opera.com"
+    var img = uploadImage{
+        Image:data,
+    }
+
+    body, err := json.Marshal(img)
+    if err != nil {
+        return err
+    }
+    url := "https://"+server+ "/upload_image/upload"
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+    if err != nil {
+        return err
+    }
+    req.Header.Add(common.ImageIDHeader, key)
+    req.Header.Add(common.BucketHeader, bucket)
+
+    client := &http.Client{Timeout:time.Duration(8000)*time.Millisecond}
+    resp, err := client.Do(req)
+    if err != nil {
+        return err
+    }
+    if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("StatusCode is not 200 , code is %d ", resp.StatusCode)
+    }
+    return nil
+}
+

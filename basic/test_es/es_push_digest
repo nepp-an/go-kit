@@ -1,0 +1,105 @@
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET /push_news_domain_index_ng_en
+
+GET /push_news_index_ng_en/news_profile/_search/
+{
+  "query": {
+    "range": {
+      "timestamp": {
+        "gt": 1581523200
+      }
+    }
+  },
+  "sort":{
+    "timestamp":{
+      "order":"asc"
+    }
+  },
+  "from":0,
+  "size":5
+}
+
+GET /push_news_domain_index_ng_en/news_profile/_search/
+{
+  "query": {
+    "range": {
+      "timestamp": {
+        "gt": 1581523200
+      }
+    }
+  }
+}
+
+GET _cat/indices/push_news_index_ng_en?v
+GET _cat/indices/push_news_domain_index_ng_en?v
+GET _cat/indices/push_news_white_domain_index_ng_en?v
+
+
+GET /push_news_domain_index_ng_en/news_profile/_search/
+{
+  "query":{
+    "match_all": {}
+    },
+  "sort":{
+    "timestamp":{
+      "order":"asc"
+    }
+  },
+  "from":0,
+  "size":10
+}
+
+GET /push_news_domain_index_ng_en/news_profile/28708f4f200212en_ng
+{
+
+  "_source":["enter_timestamp","es_store_timestamp", "es_update_timestamp", "timestamp"]
+}
+GET _cat/indices/push_news_index_ng_en?v
+
+
+
+POST /useShortIndex_ng_en/_search
+{
+	"aggs": {
+		"aggs_result": {
+  		"terms": {
+  		  "execution_hint": "map",
+  			"field": "TaxonomyId",
+  			"order" : { "_count" : "desc" },
+  			"size": 1000
+  		}
+		}
+	},
+	"size":0
+}
+POST /useShortIndex_ng_en/_search
+{
+	"aggs": {
+		"aggs_result": {
+  		"terms": {updateSingleESIndex
+  			"field": "topic.first",
+  			"order" : { "_count" : "desc" },
+  			"size": 1000
+  		}
+		}
+	},
+	"size":0
+}
+
+POST /useShortIndex_ng_en/_search
+{
+		"aggs":{
+			"distinct":{
+				"cardinality":{
+					"field":"keyword"
+				}
+			}
+		},
+		"size":0
+	}
