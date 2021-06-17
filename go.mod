@@ -8,6 +8,7 @@ require (
 	github.com/colinmarc/go-presto v0.0.0-20160304174805-3d2eb4b3df16 // indirect
 	github.com/esimov/pigo v1.4.3 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210615102113-f9e027cb8620 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/prestodb/presto-go-client v0.0.0-20201204133205-8958eb37e584 // indirect
 )
