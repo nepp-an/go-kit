@@ -16,8 +16,14 @@ type CacheService struct {
 type GetService interface {
     GetImage(string)  ([]byte, error)
 }
+
+type token struct {
+    fcm string
+}
+
 func main() {
     var _ Shape = (*Square)(nil)
+
 }
 
 

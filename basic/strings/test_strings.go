@@ -53,12 +53,18 @@ func GetShortUrl(url string) string {
 
 	return ret
 }
-
+var pushTypeDisableMap = map[string]string{
+	"AI": "ai",
+}
 func main() {
-	var input = "123#90923"
+	var input = "AI#90923"
 	if index := strings.Index(input, "#"); index != -1 {
 		typePush := input[:index]
 		fmt.Println(typePush)
+		disableType := "local,breaking,ai,ed"
+		if strings.Contains(disableType, pushTypeDisableMap[typePush]) {
+			fmt.Println("OK disable")
+		}
 	}
 	fmt.Println(time.Now().Unix())
 
